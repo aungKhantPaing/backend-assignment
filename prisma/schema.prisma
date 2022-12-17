@@ -12,3 +12,18 @@ model User {
   username String
   password String
 }
+
+model List {
+  id    Int    @id @default(autoincrement())
+  title String
+  tasks Task[]
+}
+
+model Task {
+  id        Int     @id @default(autoincrement())
+  title     String
+  completed Boolean
+  list      List    @relation(fields: [listId], references: [id])
+  listId    Int
+  listOrder Int
+}

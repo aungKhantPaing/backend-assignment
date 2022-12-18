@@ -262,18 +262,19 @@ describe('update task position', () => {
       },
       select: {
         title: true,
+        listOrder: true,
       },
       orderBy: {
         listOrder: 'asc',
       },
     })
-    expect(shiftedTasks.map(t => t.title)).toEqual([
-      'task A',
-      'task C',
-      'task D',
-      'task E',
-      'task B', // <- moved task
-      'task F',
+    expect(shiftedTasks.map(t => [t.title, t.listOrder])).toEqual([
+      ['task A', 0],
+      ['task C', 1],
+      ['task D', 2],
+      ['task E', 3],
+      ['task B', 4], // <- moved task
+      ['task F', 5],
     ])
   })
 
@@ -312,18 +313,19 @@ describe('update task position', () => {
       },
       select: {
         title: true,
+        listOrder: true,
       },
       orderBy: {
         listOrder: 'asc',
       },
     })
-    expect(shiftedTasks.map(t => t.title)).toEqual([
-      'task A',
-      'task B', // <- moved task
-      'task C',
-      'task D',
-      'task E',
-      'task F',
+    expect(shiftedTasks.map(t => [t.title, t.listOrder])).toEqual([
+      ['task A', 0],
+      ['task B', 1], // <- moved task
+      ['task C', 2],
+      ['task D', 3],
+      ['task E', 4],
+      ['task F', 5],
     ])
   })
 })
@@ -375,27 +377,36 @@ describe('delete task', () => {
   })
 })
 
-// describe('delete list', () => {
-//   it('should delete an existing list and its tasks', async () => {
-//     const response = await testServer.executeOperation({
-//       query: gql`
-//         mutation deleteList($id: ID!) {
-//           deleteList(id: $id) {
-//             success
-//           }
-//         }
-//       `,
-//       variables: { id: 1 },
-//     })
+describe('delete list', () => {
+  it('should delete an existing list and its tasks', async () => {
+    const response = await testServer.executeOperation({
+      query: gql`
+        mutation deleteList($id: ID!) {
+          deleteList(id: $id) {
+            success
+          }
+        }
+      `,
+      variables: { id: 1 },
+    })
 
-//     expect(response).toEqual(
-//       expect.objectContaining({
-//         data: {
-//           deleteList: {
-//             success: true,
-//           },
-//         },
-//       })
-//     )
-//   })
-// })
+    expect(response).toEqual(
+      expect.objectContaining({
+        data: {
+          deleteList: {
+            success: true,
+          },
+        },
+      })
+    )
+  })
+
+  it('should ensure related tasks were also deleted', async () => {
+    const remainingTasks = await prisma.task.findMany({
+      where: {
+        listId: 1,
+      },
+    })
+    expect(remainingTasks).toEqual([])
+  })
+})

@@ -23,7 +23,7 @@ model Task {
   id        Int     @id @default(autoincrement())
   title     String
   completed Boolean
-  list      List    @relation(fields: [listId], references: [id])
+  list      List    @relation(fields: [listId], references: [id], onDelete: Cascade)
   listId    Int
   listOrder Int
 

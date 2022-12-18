@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client'
+import { UserInputError } from 'apollo-server'
 import { Resolvers } from 'generated/types'
 import { Context } from '../../../libs/context'
 
@@ -50,29 +51,38 @@ export const mutation: Resolvers<Context>['Mutation'] = {
     const originalPosition = taskToMove.listOrder
     const destinationPosition = input.listOrder
 
-    await ctx.prisma.task.updateMany({
-      where: {
-        AND: [
-          { listOrder: { gt: originalPosition } },
-          { listOrder: { lte: originalPosition } },
-        ],
-        // listOrder: {
-        //   gt: originalPosition,
-        //   lte: destinationPosition,
-        // },
-      },
-      data: {
-        listOrder: {
-          ...(originalPosition > destinationPosition
-            ? {
-                decrement: 1,
-              }
-            : {
-                increment: 1,
-              }),
+    if (originalPosition < destinationPosition) {
+      await ctx.prisma.task.updateMany({
+        where: {
+          AND: [
+            { listOrder: { gt: originalPosition } },
+            { listOrder: { lte: destinationPosition } },
+          ],
         },
-      },
-    })
+        data: {
+          listOrder: {
+            decrement: 1,
+          },
+        },
+      })
+    } else if (originalPosition > destinationPosition) {
+      await ctx.prisma.task.updateMany({
+        where: {
+          AND: [
+            { listOrder: { gte: destinationPosition } },
+            { listOrder: { lt: originalPosition } },
+          ],
+        },
+        data: {
+          listOrder: {
+            increment: 1,
+          },
+        },
+      })
+    } else {
+      throw new UserInputError('listOrder is the same as existing value')
+    }
+
     return ctx.prisma.task.update({
       where: { id: Number(id) },
       data: {
@@ -86,32 +96,37 @@ export const mutation: Resolvers<Context>['Mutation'] = {
       where: { id: Number(id) },
     })
 
-    await ctx.prisma.task.updateMany({
-      where: {
-        listOrder: {
-          gt: deletedTask.listOrder,
+    return ctx.prisma.task
+      .updateMany({
+        where: {
+          listOrder: {
+            gt: deletedTask.listOrder,
+          },
         },
-      },
-      data: {
-        listOrder: {
-          decrement: 1,
+        data: {
+          listOrder: {
+            decrement: 1,
+          },
         },
-      },
-    })
-
-    return {
-      success: true,
-    }
+      })
+      .then(() => ({ success: true }))
+      .catch(e => {
+        console.error(e)
+        return { success: false }
+      })
   },
 
   deleteList: async (_, { id }, ctx) => {
-    await ctx.prisma.list.delete({
-      where: {
-        id: Number(id),
-      },
-    })
-    return {
-      success: true,
-    }
+    return ctx.prisma.list
+      .delete({
+        where: {
+          id: Number(id),
+        },
+      })
+      .then(() => ({ success: true }))
+      .catch(e => {
+        console.error(e)
+        return { success: false }
+      })
   },
 }

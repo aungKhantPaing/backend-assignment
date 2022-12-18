@@ -30,8 +30,11 @@ export const typeDefs = gql`
   input UpdateTaskInput {
     title: String
     completed: Boolean
+  }
+
+  input UpdateTaskPositionInput {
     listId: ID
-    listOrder: Int
+    listOrder: Int!
   }
 
   type MutationResult {
@@ -39,16 +42,20 @@ export const typeDefs = gql`
   }
 
   type Query {
+    ping(message: String): String!
     lists: [List!]!
   }
 
   type Mutation {
+    ping(message: String): String!
+
     createList(input: CreateListInput!): List!
     updateList(id: ID!, input: UpdateListInput!): List!
     deleteList(id: ID!): MutationResult!
 
     createTask(listId: ID!, input: CreateTaskInput!): Task!
     updateTask(id: ID!, input: UpdateTaskInput!): Task!
+    updateTaskPosition(id: ID!, input: UpdateTaskPositionInput!): Task!
     deleteTask(id: ID!): MutationResult!
   }
 `

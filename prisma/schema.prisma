@@ -26,4 +26,6 @@ model Task {
   list      List    @relation(fields: [listId], references: [id])
   listId    Int
   listOrder Int
+
+  // @@index([listOrder])
 }

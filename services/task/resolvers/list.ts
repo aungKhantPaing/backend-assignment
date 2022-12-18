@@ -9,5 +9,9 @@ export const list: Resolvers<Context>['List'] = {
           id: _parent.id,
         },
       })
-      .tasks(),
+      .tasks({
+        orderBy: {
+          listOrder: 'asc',
+        },
+      }),
 }

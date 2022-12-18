@@ -45,6 +45,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
+  await testServer.stop()
   await prisma.task.deleteMany()
   await prisma.list.deleteMany()
 

@@ -7,11 +7,11 @@
     "codegen:gql": "graphql-codegen",
     "codegen:prisma": "prisma generate",
     "db:migrate": "dotenv -- pnpm prisma migrate dev",
-    "db:migrate:test": "dotenv -e .env.test -- pnpm prisma migrate dev",
+    "db:migrate:test": "dotenv -e .env.test -- pnpm prisma migrate deploy",
     "db:reset": "dotenv -- pnpm prisma migrate reset",
     "start": "dotenv -- ts-node .",
-    "test": "dotenv --maxWorkers=1 --maxConcurrency=1 -- jest",
-    "test:debug": "NODE_OPTIONS='--experimental-vm-modules' dotenv -- jest --maxWorkers=1 --maxConcurrency=1 --verbose --watch"
+    "test": "jest --maxWorkers=1 --maxConcurrency=1",
+    "test:debug": "NODE_OPTIONS='--experimental-vm-modules' jest --maxWorkers=1 --maxConcurrency=1 --verbose --watch"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "2.8.1",
